@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  spark-master:
+    container_name: spark-master
+    hostname: spark-master
+    build:
+      context: .
+      dockerfile: Dockerfile.spark  # Path to the Dockerfile for building the Spark master image
+    command: bin/spark-class org.apache.spark.deploy.master.Master  # Command to start the Spark master
+    volumes:
+      - ./config:/opt/bitnami/spark/config  # Mounting configuration files
+      - ./jobs:/opt/bitnami/spark/jobs  # Mounting job files
+      - ./datasets:/opt/bitnami/spark/datasets  # Mounting dataset files
+      - ./requirements.txt:/requirements.txt  # Mounting requirements file (assuming it's for Python dependencies)
+    ports:
+      - "9090:8080"  # Exposing Spark master's web UI
+      - "7077:7077"  # Exposing Spark master's communication port
+    networks:
+      - Redmi Note 9  # Connecting to the custom network
+
+  spark-worker: &worker
+    container_name: spark-worker
+    hostname: spark-worker
+    build:
+      context: .
+      dockerfile: Dockerfile.spark  # Path to the Dockerfile for building the Spark worker image
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077  # Command to start the Spark worker
+    volumes:
+      - ./config:/opt/bitnami/spark/config  # Mounting configuration files
+      - ./jobs:/opt/bitnami/spark/jobs  # Mounting job files
+      - ./datasets:/opt/bitnami/spark/datasets  # Mounting dataset files
+      - ./requirements.txt:/requirements.txt  # Mounting requirements file (assuming it's for Python dependencies)
+    depends_on:
+      - spark-master  # Specifying dependency on the Spark master service
+    environment:
+      SPARK_MODE: worker  # Setting Spark mode to worker
+      SPARK_WORKER_CORES: 2  # Setting the number of cores for the Spark worker
+      SPARK_WORKER_MEMORY: 1g  # Setting the memory for the Spark worker
+      SPARK_MASTER_URL: spark://spark-master:7077  # Setting the Spark master URL
+    networks:
+      - Redmi Note 9  # Connecting to the custom network
+
+networks:
+  Redmi Note 9:  # Defining a custom network for communication between containers
