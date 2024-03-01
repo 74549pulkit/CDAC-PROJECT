@@ -9,10 +9,11 @@ services:
       dockerfile: Dockerfile.spark  # Path to the Dockerfile for building the Spark master image
     command: bin/spark-class org.apache.spark.deploy.master.Master  # Command to start the Spark master
     volumes:
-      - ./config:/opt/bitnami/spark/config  # Mounting configuration files.
+      - ./config:/opt/bitnami/spark/config  # Mounting configuration files
       - ./jobs:/opt/bitnami/spark/jobs  # Mounting job files
       - ./datasets:/opt/bitnami/spark/datasets  # Mounting dataset files
       - ./requirements.txt:/requirements.txt  # Mounting requirements file (assuming it's for Python dependencies)
+      - ./Business_Dataset:/opt/bitnami/spark/Business_Dataset # Mounting Business_dataset files
     ports:
       - "9090:8080"  # Exposing Spark master's web UI
       - "7077:7077"  # Exposing Spark master's communication port
